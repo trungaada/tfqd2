@@ -1,5 +1,15 @@
 export default async function handler(req, res) {
-  // ✅ Chặn GET, chỉ cho POST
+  // ✅ FIX CORS
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // ✅ Trả về OK cho preflight request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  // ✅ Chặn GET
   if (req.method !== "POST") {
     return res.status(200).send("Only POST allowed");
   }
@@ -25,10 +35,9 @@ export default async function handler(req, res) {
 
     const data = await r.json();
 
-    // ✅ Chống crash nếu API lỗi
     if (!data.choices) {
       return res.status(500).json({
-        error: "OpenAI API error",
+        error: "OpenAI error",
         detail: data
       });
     }
@@ -39,7 +48,7 @@ export default async function handler(req, res) {
 
   } catch (err) {
     res.status(500).json({
-      error: "Server crashed",
+      error: "Server error",
       detail: err.message
     });
   }
